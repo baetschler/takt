@@ -4,7 +4,7 @@ Intervall-Timer für Calisthenics, native iOS-App (SwiftUI, iOS 17+). Eigener Er
 
 - Workouts aus Blöcken, jeder Block mit Runden und Schritten (Übung/Pause)
 - Pause zwischen Runden und nach jedem Block, Vorbereitungszeit
-- Pieptöne in den letzten 3 Sekunden, Signal beim Phasenwechsel, deutsche Sprachansage
+- Pieptöne in den letzten 3 Sekunden, Signal beim Phasenwechsel, deutsche Sprachansage mit der besten installierten Stimme (wählbar, mit Probehören)
   („Runde 2 von 4. Klimmzüge. 40 Sekunden“, „Pause. Danach Dips“)
 - Läuft bei gesperrtem Bildschirm weiter und mischt sich über laufende Musik
 - Display bleibt während des Trainings an

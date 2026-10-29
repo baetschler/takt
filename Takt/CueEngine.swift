@@ -42,10 +42,7 @@ final class CueEngine {
     func say(_ text: String) {
         guard voiceEnabled, !text.isEmpty else { return }
         synth.stopSpeaking(at: .immediate)
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "de-DE")
-        utterance.rate = 0.52
-        synth.speak(utterance)
+        synth.speak(Voices.utterance(text))
     }
 
     private func play(_ player: AVAudioPlayer?) {
@@ -64,6 +61,42 @@ final class CueEngine {
 enum Settings {
     static let sound = "soundEnabled"
     static let voice = "voiceEnabled"
+    static let voiceID = "voiceIdentifier"
+}
+
+/// German system voices, best quality first. Premium/enhanced voices have to be downloaded once in
+/// iOS Settings → Accessibility → Spoken Content → Voices → German.
+enum Voices {
+    static var german: [AVSpeechSynthesisVoice] {
+        AVSpeechSynthesisVoice.speechVoices()
+            // Eloquence and novelty voices sound robotic, leave them out.
+            .filter { $0.language.hasPrefix("de") && !$0.identifier.contains("eloquence") && !$0.identifier.contains("speech.synthesis") }
+            .sorted { ($0.quality.rawValue, $0.name) > ($1.quality.rawValue, $1.name) }
+    }
+
+    /// The voice picked in settings, otherwise the best installed one.
+    static var selected: AVSpeechSynthesisVoice? {
+        if let id = UserDefaults.standard.string(forKey: Settings.voiceID),
+           let voice = AVSpeechSynthesisVoice(identifier: id) {
+            return voice
+        }
+        return german.first ?? AVSpeechSynthesisVoice(language: "de-DE")
+    }
+
+    static func utterance(_ text: String) -> AVSpeechUtterance {
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = selected
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        return utterance
+    }
+
+    static func label(_ voice: AVSpeechSynthesisVoice) -> String {
+        switch voice.quality {
+        case .premium: "\(voice.name) (Premium)"
+        case .enhanced: "\(voice.name) (Erweitert)"
+        default: "\(voice.name) (Einfach)"
+        }
+    }
 }
 
 /// Generates short sine tones as in-memory WAV files, so the app ships without sound assets.
