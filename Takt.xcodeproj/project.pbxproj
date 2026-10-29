@@ -1,0 +1,334 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2406075E4A34031E57FE1AC6 /* WorkoutRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58D93912B9E318B15F61F94 /* WorkoutRunner.swift */; };
+		2D88EA47A242EBECFE59CE67 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2F38BDA82AD6D09B4CAD27 /* Models.swift */; };
+		2E0B163C8F9BEB3E1F7C87FE /* CueEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33FD9C31E5CE0C715EE6512 /* CueEngine.swift */; };
+		434CDA7C98B39FBF9B572C72 /* WorkoutListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBEF9F77F99E6758AA137A5C /* WorkoutListView.swift */; };
+		4F0F730773A93AA5F3C20389 /* TaktApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DBF98C63D3226AF4E41DD3B /* TaktApp.swift */; };
+		897717E49B594A0120621C8C /* WorkoutStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F470275005B09AC34EBC0003 /* WorkoutStore.swift */; };
+		AD3C8D73B6483CD34BD527EF /* RunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EABAE12244B17C0058D7F1B /* RunView.swift */; };
+		C6F53BDE1D902B11329F704D /* WorkoutEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFD8268918BB838351946D3 /* WorkoutEditorView.swift */; };
+		DC203B315E897EAFBEFF1F87 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 898AE1B7738C7AD8C5E99B04 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		379674C43D4090DBE46D6547 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		40963202F528F02BF5EEECD8 /* Takt.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Takt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DFD8268918BB838351946D3 /* WorkoutEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutEditorView.swift; sourceTree = "<group>"; };
+		5DBF98C63D3226AF4E41DD3B /* TaktApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaktApp.swift; sourceTree = "<group>"; };
+		7EABAE12244B17C0058D7F1B /* RunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunView.swift; sourceTree = "<group>"; };
+		898AE1B7738C7AD8C5E99B04 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AE2F38BDA82AD6D09B4CAD27 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		B58D93912B9E318B15F61F94 /* WorkoutRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRunner.swift; sourceTree = "<group>"; };
+		DBEF9F77F99E6758AA137A5C /* WorkoutListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutListView.swift; sourceTree = "<group>"; };
+		E33FD9C31E5CE0C715EE6512 /* CueEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CueEngine.swift; sourceTree = "<group>"; };
+		F470275005B09AC34EBC0003 /* WorkoutStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutStore.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		35BC6F3D518F6D5AC2584562 = {
+			isa = PBXGroup;
+			children = (
+				5646EA3008FD47C65664CC88 /* Takt */,
+				5A23AC19920F57158F48403F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5646EA3008FD47C65664CC88 /* Takt */ = {
+			isa = PBXGroup;
+			children = (
+				898AE1B7738C7AD8C5E99B04 /* Assets.xcassets */,
+				E33FD9C31E5CE0C715EE6512 /* CueEngine.swift */,
+				379674C43D4090DBE46D6547 /* Info.plist */,
+				AE2F38BDA82AD6D09B4CAD27 /* Models.swift */,
+				7EABAE12244B17C0058D7F1B /* RunView.swift */,
+				5DBF98C63D3226AF4E41DD3B /* TaktApp.swift */,
+				4DFD8268918BB838351946D3 /* WorkoutEditorView.swift */,
+				DBEF9F77F99E6758AA137A5C /* WorkoutListView.swift */,
+				B58D93912B9E318B15F61F94 /* WorkoutRunner.swift */,
+				F470275005B09AC34EBC0003 /* WorkoutStore.swift */,
+			);
+			path = Takt;
+			sourceTree = "<group>";
+		};
+		5A23AC19920F57158F48403F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				40963202F528F02BF5EEECD8 /* Takt.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EF5B3C65A547E29C598D79D9 /* Takt */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 72E15F1795023E5FE1D3501E /* Build configuration list for PBXNativeTarget "Takt" */;
+			buildPhases = (
+				2F637581F5EBEC5B025944EB /* Sources */,
+				13C6C16154B6F5F934F26B27 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Takt;
+			packageProductDependencies = (
+			);
+			productName = Takt;
+			productReference = 40963202F528F02BF5EEECD8 /* Takt.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		984E8BFCD199ADEF94EC445C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					EF5B3C65A547E29C598D79D9 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 61313A2402288ACEFB35B7C0 /* Build configuration list for PBXProject "Takt" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 35BC6F3D518F6D5AC2584562;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5A23AC19920F57158F48403F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EF5B3C65A547E29C598D79D9 /* Takt */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		13C6C16154B6F5F934F26B27 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC203B315E897EAFBEFF1F87 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2F637581F5EBEC5B025944EB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2E0B163C8F9BEB3E1F7C87FE /* CueEngine.swift in Sources */,
+				2D88EA47A242EBECFE59CE67 /* Models.swift in Sources */,
+				AD3C8D73B6483CD34BD527EF /* RunView.swift in Sources */,
+				4F0F730773A93AA5F3C20389 /* TaktApp.swift in Sources */,
+				C6F53BDE1D902B11329F704D /* WorkoutEditorView.swift in Sources */,
+				434CDA7C98B39FBF9B572C72 /* WorkoutListView.swift in Sources */,
+				2406075E4A34031E57FE1AC6 /* WorkoutRunner.swift in Sources */,
+				897717E49B594A0120621C8C /* WorkoutStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		01BEA9B2608125747550E6F1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5517376EA87589470FBCB84D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		849CBFC0178E0082A2C6B6BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = Takt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.kaibachler.takt;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		FC75C094AE5B1D86AF96A799 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = Takt/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.kaibachler.takt;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		61313A2402288ACEFB35B7C0 /* Build configuration list for PBXProject "Takt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01BEA9B2608125747550E6F1 /* Debug */,
+				5517376EA87589470FBCB84D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		72E15F1795023E5FE1D3501E /* Build configuration list for PBXNativeTarget "Takt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				849CBFC0178E0082A2C6B6BB /* Debug */,
+				FC75C094AE5B1D86AF96A799 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 984E8BFCD199ADEF94EC445C /* Project object */;
+}
