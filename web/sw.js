@@ -1,5 +1,5 @@
 // Offline cache: the app is a handful of static files. Bump CACHE on every release.
-const CACHE = "takt-0.3.0";
+const CACHE = "takt-0.4.0";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {

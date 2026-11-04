@@ -50,6 +50,10 @@ Dieselbe App als PWA (Progressive Web App), ohne Xcode und ohne 7-Tage-Signatur.
 `index.html` plus Manifest, Service Worker (offline) und Icons. Gleiche Phasenlogik und Timer-Engine
 wie in `Models.swift` / `WorkoutRunner.swift`, Töne per Web Audio, Ansagen per `speechSynthesis`.
 
+Nur in der Webapp (ab 0.4.0): gesprochener Countdown „3, 2, 1“ am Ende jeder Phase (große Ziffer im Ring),
+Bewertung jeder Übung in der folgenden Pause (geschafft ja/nein, Härte 1–10), offene Bewertungen auf dem
+Abschluss-Screen, Verlauf aller Trainings. Beides in den Einstellungen abschaltbar.
+
 Lokal starten: `python3 -m http.server 8745 --directory web`, dann http://localhost:8745.
 Aufs iPhone: statisch per HTTPS hosten (z. B. GitHub Pages), in Safari öffnen, Teilen → Zum Home-Bildschirm.
 Bei jedem Release `CACHE` in `web/sw.js` und `VERSION` in `web/index.html` hochzählen.

@@ -101,6 +101,32 @@
   .finished h2 { margin: 0; font-size: 34px; }
   .big-btn { width: 100%; padding: 16px; border-radius: 14px; background: rgba(255,255,255,.22); font-weight: 600; }
   .note { font-size: 13px; color: var(--muted); padding: 0 4px; }
+
+  /* Countdown digit over the ring */
+  .clock.count { font-size: clamp(80px, 30vw, 132px); }
+
+  /* Rating (RPE, Rate of Perceived Exertion) */
+  .rate { background: rgba(255,255,255,.16); border-radius: 14px; padding: 10px 12px; margin-bottom: 12px; }
+  .rate-head { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 8px; }
+  .rate-head .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .yn { padding: 5px 16px; font-weight: 700; border-radius: 10px; background: rgba(255,255,255,.18); font-size: 15px; }
+  .yn.on { background: #fff; color: #111; }
+  .rpe { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+  .rpe button { height: 36px; border-radius: 8px; background: rgba(255,255,255,.18); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rpe button.on { background: #fff; color: #111; }
+  .rate-hint { display: flex; justify-content: space-between; font-size: 12px; opacity: .8; margin-top: 4px; }
+  #run.rating .ring { width: min(70vw, 300px, 40vh); }
+  .fin-list { width: 100%; text-align: left; overflow-y: auto; min-height: 0; flex: 1 1 auto; -webkit-overflow-scrolling: touch; }
+  .fin-list .rate { margin-bottom: 8px; }
+  .finished.with-list { justify-content: flex-start; padding-top: 12px; }
+  .finished.with-list .check { font-size: 48px; }
+  .finished.with-list { gap: 6px; min-height: 0; }
+  .finished.with-list h2 { font-size: 28px; }
+
+  /* History */
+  .hist-ex { display: flex; gap: 8px; font-size: 15px; }
+  .hist-ex .grow { flex: 1; min-width: 0; }
+  .hist-ex .marks { font-variant-numeric: tabular-nums; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -110,6 +136,7 @@
   <header>
     <button class="icon-btn" id="open-settings" aria-label="Einstellungen">⚙︎</button>
     <h1>Takt</h1>
+    <button class="link" id="open-history" style="margin-right:4px">Verlauf</button>
     <button class="icon-btn" id="new-workout" aria-label="Neues Workout">＋</button>
   </header>
   <main>
@@ -128,6 +155,16 @@
   <main id="editor"></main>
 </section>
 
+<!-- History -->
+<section id="history-view" class="hidden">
+  <header>
+    <button class="link" id="history-back">‹ Takt</button>
+    <div class="title-small">Verlauf</div>
+    <div style="width:60px"></div>
+  </header>
+  <main id="history"></main>
+</section>
+
 <!-- Settings -->
 <section id="settings-view" class="hidden">
   <header>
@@ -140,7 +177,10 @@
     <div class="card">
       <label class="row"><span class="grow">Signaltöne</span><input type="checkbox" id="set-sound"></label>
       <label class="row"><span class="grow">Sprachansagen</span><input type="checkbox" id="set-voice"></label>
+      <label class="row"><span class="grow">Countdown „3, 2, 1“ ansagen</span><input type="checkbox" id="set-count"></label>
+      <label class="row"><span class="grow">Übungen bewerten</span><input type="checkbox" id="set-rate"></label>
     </div>
+    <p class="foot">Countdown: In den letzten 3 Sekunden jeder Phase zählt die Stimme runter, also vor dem Start einer Übung und vor ihrem Ende. Ohne Sprachansagen bleibt es bei Pieptönen. Bewerten: In der Pause nach einer Übung fragt Takt, ob du sie geschafft hast und wie hart sie war (1 leicht bis 10 maximal).</p>
     <p class="foot">Die Webapp hält das Display während des Trainings an. Wird das iPhone gesperrt oder die App verlassen, pausieren Töne und Ansagen, die Zeit läuft aber korrekt weiter.</p>
 
     <div id="voice-section">
@@ -154,10 +194,10 @@
 
     <div class="section-head">Daten</div>
     <div class="card">
-      <button class="row add" id="export" style="width:100%">Workouts exportieren (JSON)</button>
+      <button class="row add" id="export" style="width:100%">Workouts und Verlauf exportieren (JSON)</button>
       <label class="row add" style="cursor:pointer">Workouts importieren<input type="file" id="import" accept="application/json,.json" class="hidden"></label>
     </div>
-    <p class="foot">Workouts liegen nur in diesem Browser. Ein Export dient als Sicherung oder um sie aufs iPhone zu bringen.</p>
+    <p class="foot">Workouts und Verlauf liegen nur in diesem Browser. Ein Export dient als Sicherung oder um sie aufs iPhone zu bringen.</p>
     <p class="foot" id="version"></p>
   </main>
 </section>
@@ -179,7 +219,7 @@
 
 <script>
 "use strict";
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 // ---------- Model ----------
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
@@ -255,8 +295,10 @@ const store = {
   save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
 };
 let workouts = store.load("takt.workouts", null) || SAMPLES();
-const settings = Object.assign({ sound: true, voice: true, voiceURI: "" }, store.load("takt.settings", {}));
+const settings = Object.assign({ sound: true, voice: true, voiceURI: "", countdown: true, rating: true }, store.load("takt.settings", {}));
+let history = store.load("takt.history", []); // [{ id, date, workout, seconds, finished, entries: [{ name, block, round, rounds, done, rpe }] }]
 const saveWorkouts = () => store.save("takt.workouts", workouts);
+const saveHistory = () => store.save("takt.history", history);
 const saveSettings = () => store.save("takt.settings", settings);
 saveWorkouts();
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
@@ -342,6 +384,27 @@ class Runner {
     this.isRunning = false;
     this.isFinished = this.phases.length === 0;
     this.endDate = null; this.timer = null; this.lastBeep = null; this.hasStarted = false;
+    this.entries = new Map(); // phase index -> rating entry, created when a work phase is left
+    this.startedAt = null;
+  }
+  /** Oldest unrated exercise behind us, shown for rating while resting. */
+  get pendingRating() {
+    if (!settings.rating || this.isFinished || this.current?.kind !== "rest") return null;
+    for (const [i, e] of [...this.entries].sort((a, b) => a[0] - b[0])) if (e.rpe === null && i < this.index) return e;
+    return null;
+  }
+  /** Countdown number shown big in the last 3 seconds, or null. */
+  get countdown() {
+    const c = this.current;
+    if (!c || c.seconds <= 3 || this.isFinished) return null;
+    const n = Math.ceil(this.remaining);
+    return n <= 3 && n >= 1 ? n : null;
+  }
+  /** Remember a work phase as done-ish once we move past it. */
+  leave(i) {
+    const p = this.phases[i];
+    if (!p || p.kind !== "work" || this.entries.has(i)) return;
+    this.entries.set(i, { name: p.name, block: p.blockName, round: p.round, rounds: p.rounds, done: null, rpe: null });
   }
   get current() { return this.phases[this.index] || null; }
   get next() { return this.phases[this.index + 1] || null; }
@@ -350,7 +413,7 @@ class Runner {
 
   start() {
     if (this.isFinished || this.isRunning) return;
-    if (!this.hasStarted) { this.hasStarted = true; cues.begin(); this.announce(); }
+    if (!this.hasStarted) { this.hasStarted = true; this.startedAt = Date.now(); cues.begin(); this.announce(); }
     this.endDate = Date.now() + this.remaining * 1000;
     this.isRunning = true;
     this.timer = setInterval(() => this.update(), 50);
@@ -380,6 +443,7 @@ class Runner {
 
   jump(i) {
     this.lastBeep = null;
+    if (i > this.index) for (let k = this.index; k < i; k++) this.leave(k);
     if (i >= this.phases.length) { this.finish(); return; }
     this.index = i;
     this.remaining = this.phases[i].seconds;
@@ -394,6 +458,7 @@ class Runner {
     // Phase over: chain the next one onto the old end date so overshoot isn't lost.
     while (left <= 0) {
       if (this.index + 1 >= this.phases.length) { this.remaining = 0; this.finish(); return; }
+      this.leave(this.index);
       this.index++; skipped++;
       this.lastBeep = null;
       end += this.phases[this.index].seconds * 1000;
@@ -403,16 +468,19 @@ class Runner {
     if (skipped) this.announce();
     this.endDate = end;
     this.remaining = left;
-    const second = Math.ceil(left);
-    if (second <= 3 && second !== this.lastBeep && (this.current?.seconds || 0) > 3) {
+    // Spoken numbers start a little early so speech latency doesn't make them late.
+    const spoken = settings.countdown && settings.voice;
+    const second = Math.ceil(left - (spoken ? 0.25 : 0));
+    if (second >= 1 && second <= 3 && second !== this.lastBeep && (this.current?.seconds || 0) > 3) {
       this.lastBeep = second;
-      if (!skipped) cues.tick();
+      if (!skipped) spoken ? cues.say(["Eins", "Zwei", "Drei"][second - 1]) : cues.tick();
     }
     this.onChange();
   }
   finish() {
     clearInterval(this.timer); this.timer = null;
     this.isRunning = false; this.isFinished = true;
+    for (let k = this.index; k < this.phases.length; k++) this.leave(k);
     this.index = this.phases.length; this.remaining = 0;
     cues.finish(); cues.say("Geschafft!");
     this.onChange();
@@ -436,7 +504,7 @@ class Runner {
 // ---------- UI helpers ----------
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const views = ["list-view", "editor-view", "settings-view"];
+const views = ["list-view", "editor-view", "settings-view", "history-view"];
 function show(view) { views.forEach(v => $(v).classList.toggle("hidden", v !== view)); window.scrollTo(0, 0); }
 
 // ---------- List ----------
@@ -603,6 +671,8 @@ if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = renderVoices;
 $("open-settings").onclick = () => {
   $("set-sound").checked = settings.sound;
   $("set-voice").checked = settings.voice;
+  $("set-count").checked = settings.countdown;
+  $("set-rate").checked = settings.rating;
   $("voice-section").classList.toggle("hidden", !settings.voice);
   $("version").textContent = `Takt ${VERSION}`;
   renderVoices();
@@ -611,10 +681,12 @@ $("open-settings").onclick = () => {
 $("settings-done").onclick = () => show("list-view");
 $("set-sound").onchange = e => { settings.sound = e.target.checked; saveSettings(); };
 $("set-voice").onchange = e => { settings.voice = e.target.checked; saveSettings(); $("voice-section").classList.toggle("hidden", !settings.voice); };
+$("set-count").onchange = e => { settings.countdown = e.target.checked; saveSettings(); };
+$("set-rate").onchange = e => { settings.rating = e.target.checked; saveSettings(); };
 $("set-voice-id").onchange = e => { settings.voiceURI = e.target.value; saveSettings(); };
 $("voice-test").onclick = () => cues.say("Runde 2 von 4. Klimmzüge. 40 Sekunden.");
 $("export").onclick = () => {
-  const blob = new Blob([JSON.stringify(workouts, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify({ app: "takt", version: VERSION, workouts, history }, null, 2)], { type: "application/json" });
   const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "takt-workouts.json" });
   a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
@@ -622,15 +694,87 @@ $("import").onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
   try {
-    const data = JSON.parse(await file.text());
+    const raw = JSON.parse(await file.text());
+    // Older exports are a bare workout array.
+    const data = Array.isArray(raw) ? raw : raw.workouts;
+    const hist = Array.isArray(raw.history) ? raw.history : [];
     if (!Array.isArray(data) || !data.every(w => w && Array.isArray(w.blocks))) throw new Error();
-    if (confirm(`${data.length} Workouts importieren? Gleichnamige bleiben erhalten, die neuen kommen dazu.`)) {
+    if (confirm(`${data.length} Workouts${hist.length ? ` und ${hist.length} Trainings` : ""} importieren? Vorhandenes bleibt erhalten, das Neue kommt dazu.`)) {
       data.forEach(w => { w.id = uid(); workouts.push(w); });
-      saveWorkouts(); renderList(); alert("Importiert.");
+      const known = new Set(history.map(h => h.id));
+      hist.filter(h => !known.has(h.id)).forEach(h => history.push(h));
+      history.sort((a, b) => b.date.localeCompare(a.date));
+      saveWorkouts(); saveHistory(); renderList(); alert("Importiert.");
     }
   } catch { alert("Die Datei ist kein gültiger Takt-Export."); }
   e.target.value = "";
 };
+
+// ---------- History ----------
+/** Writes the running session into history (once, then updates in place). */
+function recordSession(r) {
+  if (!r || !r.hasStarted || r.entries.size === 0) return;
+  const entries = [...r.entries].sort((a, b) => a[0] - b[0]).map(([, e]) => e);
+  const seconds = r.isFinished ? totalSeconds(r.workout) : Math.round((Date.now() - r.startedAt) / 1000);
+  if (!r.sessionId) {
+    r.sessionId = uid();
+    history.unshift({ id: r.sessionId, date: new Date(r.startedAt).toISOString(), workout: r.workout.name, seconds, finished: r.isFinished, entries });
+  } else {
+    Object.assign(history.find(h => h.id === r.sessionId) || {}, { entries, seconds, finished: r.isFinished });
+  }
+  saveHistory();
+}
+
+function rateHTML(e, key) {
+  const label = e.rounds > 1 ? `${esc(e.name)} · R${e.round}` : esc(e.name);
+  return `<div class="rate" data-entry="${key}">
+    <div class="rate-head"><span class="grow">${label}</span>
+      <button class="yn ${e.done === true ? "on" : ""}" data-done="1" aria-label="Geschafft">✓</button>
+      <button class="yn ${e.done === false ? "on" : ""}" data-done="0" aria-label="Nicht geschafft">✗</button></div>
+    <div class="rpe">${Array.from({ length: 10 }, (_, i) => `<button class="${e.rpe === i + 1 ? "on" : ""}" data-rpe="${i + 1}">${i + 1}</button>`).join("")}</div>
+    <div class="rate-hint"><span>leicht</span><span>Wie hart?</span><span>maximal</span></div>
+  </div>`;
+}
+/** Handles taps inside a rating card. Returns true when the card is complete. */
+function applyRating(e, target) {
+  if (target.dataset.done !== undefined) e.done = target.dataset.done === "1";
+  if (target.dataset.rpe) { e.rpe = +target.dataset.rpe; if (e.done === null) e.done = true; }
+  return e.rpe !== null;
+}
+
+function renderHistory() {
+  const box = $("history");
+  if (!history.length) { box.innerHTML = `<div class="empty">Noch kein Training aufgezeichnet.</div>`; return; }
+  box.innerHTML = history.map((h, hi) => {
+    const d = new Date(h.date);
+    const date = d.toLocaleDateString("de-DE", { weekday: "short", day: "numeric", month: "numeric", year: "2-digit" }) + ", " + d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    // One line per exercise: done marks per round and average hardness.
+    const byName = new Map();
+    for (const e of h.entries) {
+      const k = `${e.block}|${e.name}`;
+      if (!byName.has(k)) byName.set(k, { name: e.name, list: [] });
+      byName.get(k).list.push(e);
+    }
+    const lines = [...byName.values()].map(({ name, list }) => {
+      const marks = list.map(e => (e.done === true ? "✓" : e.done === false ? "✗" : "·")).join("");
+      const rpes = list.filter(e => e.rpe).map(e => e.rpe);
+      const avg = rpes.length ? (rpes.reduce((a, b) => a + b, 0) / rpes.length).toFixed(1).replace(".", ",") : "–";
+      return `<div class="hist-ex"><span class="grow">${esc(name)}</span><span class="marks">${marks} · Ø ${avg}</span></div>`;
+    }).join("");
+    return `<div class="section-head"><span>${date}</span><button class="menu-btn danger" data-del-hist="${hi}">Löschen</button></div>
+      <div class="card"><div class="row" style="display:block">
+        <div class="wk-name">${esc(h.workout)}</div>
+        <div class="sub" style="margin-bottom:6px">${formatDuration(h.seconds)}${h.finished ? "" : " · abgebrochen"}</div>
+        ${lines}
+      </div></div>`;
+  }).join("") + `<p class="foot" style="margin-top:12px">✓ geschafft · ✗ nicht geschafft · Ø mittlere Härte (1–10)</p>`;
+}
+$("open-history").onclick = () => { renderHistory(); show("history-view"); };
+$("history-back").onclick = () => show("list-view");
+$("history").addEventListener("click", e => {
+  const del = e.target.closest("[data-del-hist]");
+  if (del && confirm("Diesen Eintrag löschen?")) { history.splice(+del.dataset.delHist, 1); saveHistory(); renderHistory(); }
+});
 
 // ---------- Run screen ----------
 let runner = null;
@@ -642,6 +786,7 @@ const ICON = {
 };
 
 function startRun(workout) {
+  lastShown = ""; rateKey = "";
   runner = new Runner(structuredClone(workout), renderRun);
   $("run").classList.remove("hidden");
   buildRun();
@@ -649,6 +794,7 @@ function startRun(workout) {
   runner.start(); // called inside the tap, so audio and speech get unlocked
 }
 function closeRun() {
+  recordSession(runner);
   runner.stop(); runner = null;
   wake.off();
   $("run").classList.add("hidden");
@@ -673,6 +819,7 @@ function buildRun() {
       </div>
     </div>
     <div id="run-bottom">
+      <div id="run-rate"></div>
       <div class="next" id="run-next"></div>
       <div class="controls">
         <button id="run-back" aria-label="Zurück">${ICON.back}</button>
@@ -683,8 +830,8 @@ function buildRun() {
     <div class="finished hidden" id="run-finished">
       <div class="check">✓</div><h2>Geschafft!</h2>
       <div id="fin-name" style="font-size:20px"></div><div id="fin-time" style="opacity:.85;font-weight:600"></div>
-      <div style="height:40px"></div>
-      <button class="big-btn" id="run-done">Fertig</button>
+      <div class="fin-list" id="fin-list"></div>
+      <button class="big-btn" id="run-done" style="flex:none">Fertig</button>
     </div>`;
   $("run-close").onclick = () => {
     runner.pause();
@@ -695,10 +842,25 @@ function buildRun() {
   $("run-back").onclick = () => runner.back();
   $("run-skip").onclick = () => runner.skip();
   $("run-done").onclick = closeRun;
+  $("run-rate").addEventListener("click", e => {
+    const t = e.target.closest("button"), e2 = runner && runner.pendingRating;
+    if (!t || !e2) return;
+    applyRating(e2, t);
+    recordSession(runner);
+    lastShown = ""; rateKey = ""; renderRun();
+  });
+  $("fin-list").addEventListener("click", e => {
+    const t = e.target.closest("button"), card = e.target.closest("[data-entry]");
+    if (!t || !card) return;
+    const entry = runner.entries.get(+card.dataset.entry);
+    applyRating(entry, t);
+    recordSession(runner);
+    card.outerHTML = rateHTML(entry, card.dataset.entry);
+  });
   renderRun();
 }
 
-let lastShown = "";
+let lastShown = "", rateKey = "";
 function renderRun() {
   if (!runner) return;
   const run = $("run"), r = runner, c = r.current;
@@ -707,10 +869,28 @@ function renderRun() {
   $("run-finished").classList.toggle("hidden", !done);
   run.className = done ? "work" : `${c.kind}${r.isRunning ? "" : " paused"}`;
   if (done) {
-    $("fin-name").textContent = r.workout.name;
-    $("fin-time").textContent = formatDuration(totalSeconds(r.workout));
-    wake.off();
+    if (!$("run-finished").dataset.built) {
+      $("run-finished").dataset.built = "1";
+      $("fin-name").textContent = r.workout.name;
+      $("fin-time").textContent = formatDuration(totalSeconds(r.workout));
+      // Only what wasn't rated during the rests; the rest is in the history.
+      const items = [...r.entries].sort((a, b) => a[0] - b[0]).filter(([, e]) => e.rpe === null);
+      const show = settings.rating && items.length > 0;
+      $("run-finished").classList.toggle("with-list", show);
+      $("fin-list").innerHTML = show
+        ? `<p style="text-align:center;opacity:.9;margin:8px 0 10px">Wie lief's? ${items.length === 1 ? "Eine Übung ist" : items.length + " Übungen sind"} noch offen.</p>` + items.map(([i, e]) => rateHTML(e, i)).join("")
+        : "";
+      recordSession(r);
+      wake.off();
+    }
     return;
+  }
+  const pending = r.pendingRating;
+  run.classList.toggle("rating", !!pending);
+  const rk = pending ? `${pending.name}|${pending.round}|${pending.done}|${pending.rpe}` : "";
+  if (rk !== rateKey) {
+    rateKey = rk;
+    $("run-rate").innerHTML = pending ? rateHTML(pending, "") : "";
   }
   const C = 2 * Math.PI * 45;
   $("ring-arc").setAttribute("stroke-dashoffset", C * (1 - r.phaseProgress));
@@ -721,7 +901,9 @@ function renderRun() {
   $("run-block").textContent = c.blockName;
   $("run-round").textContent = c.rounds > 1 ? `Runde ${c.round} von ${c.rounds}` : "";
   $("run-name").textContent = c.name;
-  $("run-clock").textContent = formatDuration(Math.ceil(r.remaining));
+  const cd = r.isRunning ? r.countdown : null;
+  $("run-clock").textContent = cd ? String(cd) : formatDuration(Math.ceil(r.remaining));
+  $("run-clock").classList.toggle("count", !!cd);
   $("run-paused").classList.toggle("hidden", r.isRunning);
   $("run-toggle").innerHTML = r.isRunning ? ICON.pause : ICON.play;
   $("run-toggle").setAttribute("aria-label", r.isRunning ? "Pause" : "Weiter");
