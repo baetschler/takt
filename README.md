@@ -43,3 +43,17 @@ Version: `MARKETING_VERSION` in `project.yml`.
 | `CueEngine.swift` | Töne (zur Laufzeit erzeugt), Sprachausgabe, Audio-Session für den Hintergrund |
 | `WorkoutStore.swift` | Speichern als JSON |
 | `*View.swift` | Oberfläche |
+
+## Webapp (`web/`)
+
+Dieselbe App als PWA (Progressive Web App), ohne Xcode und ohne 7-Tage-Signatur. Eine einzige
+`index.html` plus Manifest, Service Worker (offline) und Icons. Gleiche Phasenlogik und Timer-Engine
+wie in `Models.swift` / `WorkoutRunner.swift`, Töne per Web Audio, Ansagen per `speechSynthesis`.
+
+Lokal starten: `python3 -m http.server 8745 --directory web`, dann http://localhost:8745.
+Aufs iPhone: statisch per HTTPS hosten (z. B. GitHub Pages), in Safari öffnen, Teilen → Zum Home-Bildschirm.
+Bei jedem Release `CACHE` in `web/sw.js` und `VERSION` in `web/index.html` hochzählen.
+
+Grenzen gegenüber nativ: Bei gesperrtem Bildschirm oder im Hintergrund pausieren Töne und Ansagen
+(die Zeit läuft korrekt weiter, das Display bleibt per Wake Lock an). Der Stummschalter kann Töne
+abschalten. Workouts liegen im Browser-Speicher, daher Export/Import als JSON in den Einstellungen.

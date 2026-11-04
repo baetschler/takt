@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Takt">
+<meta name="theme-color" content="#1f9e5c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Takt</title>
+<style>
+  :root {
+    --prepare: #f2941a; --work: #1f9e5c; --rest: #2966d1;
+    --bg: #f2f2f7; --card: #fff; --text: #111; --muted: #6b6b70; --line: #e3e3e8; --danger: #d63b30;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #000; --card: #1c1c1e; --text: #f2f2f2; --muted: #98989f; --line: #2c2c2e; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 17px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+  input, select { font: inherit; color: inherit; }
+  .hidden { display: none !important; }
+
+  header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; position: sticky; top: 0; background: var(--bg); z-index: 2; }
+  header h1 { flex: 1; margin: 0; font-size: 28px; }
+  header .title-small { flex: 1; text-align: center; font-weight: 600; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .link { color: var(--work); font-weight: 500; }
+  .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; font-size: 22px; color: var(--work); }
+
+  main { padding: 0 16px 32px; max-width: 640px; margin: 0 auto; }
+  .card { background: var(--card); border-radius: 12px; margin: 0 0 8px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; min-height: 48px; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; }
+  .row > .grow { flex: 1; min-width: 0; }
+  .row input[type=text] { width: 100%; border: 0; background: none; outline: none; padding: 0; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin: 22px 4px 6px; font-size: 13px; text-transform: uppercase; color: var(--muted); }
+  .foot { font-size: 13px; color: var(--muted); margin: 0 4px 6px; }
+  .sub { font-size: 15px; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; }
+
+  .wk-name { font-weight: 600; }
+  .play-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--work); color: #fff; display: grid; place-items: center; font-size: 16px; flex: none; }
+  .dur { font-variant-numeric: tabular-nums; background: var(--bg); border-radius: 8px; padding: 5px 10px; color: var(--work); font-weight: 500; flex: none; }
+  .kind { width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 13px; display: grid; place-items: center; flex: none; }
+  .kind.work { background: var(--work); } .kind.rest { background: var(--rest); }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button { width: 34px; height: 30px; background: var(--bg); border-radius: 8px; font-size: 18px; }
+  .del { color: var(--danger); font-size: 20px; width: 28px; flex: none; }
+  .move { color: var(--muted); font-size: 14px; width: 22px; flex: none; }
+  .add { color: var(--work); }
+  .danger { color: var(--danger); }
+  .menu-btn { color: var(--work); font-size: 13px; text-transform: none; }
+
+  /* Duration sheet */
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { background: var(--card); width: 100%; max-width: 640px; border-radius: 14px 14px 0 0; padding: 14px 16px calc(20px + env(safe-area-inset-bottom)); }
+  .sheet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 600; }
+  .picker { display: flex; gap: 12px; }
+  .picker select { flex: 1; font-size: 22px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); text-align: center; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chips button { background: var(--bg); border-radius: 16px; padding: 6px 12px; font-size: 15px; }
+
+  /* Run screen */
+  #run { position: fixed; inset: 0; z-index: 10; color: #fff; display: flex; flex-direction: column;
+         padding: calc(8px + env(safe-area-inset-top)) 20px calc(16px + env(safe-area-inset-bottom)); transition: background-color .35s; }
+  #run.prepare { background: var(--prepare); } #run.work { background: var(--work); } #run.rest { background: var(--rest); }
+  #run.paused { filter: saturate(.6) brightness(.85); }
+  .run-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .run-top .close { font-size: 26px; width: 44px; height: 44px; }
+  .run-top .total { text-align: right; }
+  .run-top .total small { display: block; font-size: 13px; opacity: .8; }
+  .run-top .total b { font-variant-numeric: tabular-nums; }
+  .run-block { text-align: center; margin-top: 4px; }
+  .run-block b { font-size: 21px; display: block; }
+  .run-block span { opacity: .85; font-size: 15px; }
+  .ring-wrap { flex: 1; display: grid; place-items: center; min-height: 0; }
+  .ring { position: relative; width: min(84vw, 340px, 52vh); aspect-ratio: 1; }
+  .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring .inner { position: absolute; inset: 14%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .phase-name { font-size: clamp(22px, 7vw, 32px); font-weight: 700; line-height: 1.1; }
+  .clock { font-size: clamp(56px, 22vw, 92px); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -1px;
+           font-family: ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif; }
+  .paused-label { font-weight: 600; opacity: .9; }
+  .next { text-align: center; font-weight: 600; opacity: .9; margin-bottom: 16px; }
+  .controls { display: flex; justify-content: center; align-items: center; gap: 44px; }
+  .controls button { width: 64px; height: 64px; display: grid; place-items: center; }
+  .controls svg { fill: #fff; }
+  .controls .main { width: 88px; height: 88px; border-radius: 50%; background: rgba(255,255,255,.22); }
+  .finished { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+  .finished .check { font-size: 88px; line-height: 1; }
+  .finished h2 { margin: 0; font-size: 34px; }
+  .big-btn { width: 100%; padding: 16px; border-radius: 14px; background: rgba(255,255,255,.22); font-weight: 600; }
+  .note { font-size: 13px; color: var(--muted); padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<!-- List -->
+<section id="list-view">
+  <header>
+    <button class="icon-btn" id="open-settings" aria-label="Einstellungen">⚙︎</button>
+    <h1>Takt</h1>
+    <button class="icon-btn" id="new-workout" aria-label="Neues Workout">＋</button>
+  </header>
+  <main>
+    <div class="card" id="workout-list"></div>
+    <div class="empty hidden" id="empty">Keine Workouts.<br>Leg mit + dein erstes an.</div>
+  </main>
+</section>
+
+<!-- Editor -->
+<section id="editor-view" class="hidden">
+  <header>
+    <button class="link" id="editor-back">‹ Takt</button>
+    <div class="title-small" id="editor-title"></div>
+    <button class="link" id="editor-start">▶ Start</button>
+  </header>
+  <main id="editor"></main>
+</section>
+
+<!-- Settings -->
+<section id="settings-view" class="hidden">
+  <header>
+    <div style="width:60px"></div>
+    <div class="title-small">Einstellungen</div>
+    <button class="link" id="settings-done" style="width:60px;text-align:right">Fertig</button>
+  </header>
+  <main>
+    <div class="section-head">Signale</div>
+    <div class="card">
+      <label class="row"><span class="grow">Signaltöne</span><input type="checkbox" id="set-sound"></label>
+      <label class="row"><span class="grow">Sprachansagen</span><input type="checkbox" id="set-voice"></label>
+    </div>
+    <p class="foot">Die Webapp hält das Display während des Trainings an. Wird das iPhone gesperrt oder die App verlassen, pausieren Töne und Ansagen, die Zeit läuft aber korrekt weiter.</p>
+
+    <div id="voice-section">
+      <div class="section-head">Stimme</div>
+      <div class="card">
+        <div class="row"><select id="set-voice-id" class="grow" style="border:0;background:none"></select></div>
+        <button class="row add" id="voice-test" style="width:100%">🔊 Probehören</button>
+      </div>
+      <p class="foot">Natürlicher klingen die Premium-Stimmen. Laden: iPhone-Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch, z. B. Anna (Premium).</p>
+    </div>
+
+    <div class="section-head">Daten</div>
+    <div class="card">
+      <button class="row add" id="export" style="width:100%">Workouts exportieren (JSON)</button>
+      <label class="row add" style="cursor:pointer">Workouts importieren<input type="file" id="import" accept="application/json,.json" class="hidden"></label>
+    </div>
+    <p class="foot">Workouts liegen nur in diesem Browser. Ein Export dient als Sicherung oder um sie aufs iPhone zu bringen.</p>
+    <p class="foot" id="version"></p>
+  </main>
+</section>
+
+<!-- Run -->
+<section id="run" class="hidden"></section>
+
+<!-- Duration sheet -->
+<div class="sheet-bg hidden" id="sheet">
+  <div class="sheet">
+    <div class="sheet-top"><span>Dauer</span><button class="link" id="sheet-done">Fertig</button></div>
+    <div class="picker">
+      <select id="pick-min"></select>
+      <select id="pick-sec"></select>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const VERSION = "0.3.0";
+
+// ---------- Model ----------
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+const step = (name, seconds, kind = "work") => ({ id: uid(), name, seconds, kind });
+const block = (name, rounds, restBetweenRounds, restAfterBlock, steps) =>
+  ({ id: uid(), name, rounds, restBetweenRounds, restAfterBlock, steps });
+
+const SAMPLES = () => [
+  { id: uid(), name: "Calisthenics Basis", prepareSeconds: 10, blocks: [
+    block("Push & Pull", 4, 90, 120, [step("Klimmzüge", 40), step("Pause", 20, "rest"), step("Liegestütze", 40), step("Pause", 20, "rest"), step("Dips", 40)]),
+    block("Core", 3, 30, 0, [step("Hollow Hold", 30), step("Pause", 15, "rest"), step("Plank", 45)]),
+  ]},
+  { id: uid(), name: "Tabata", prepareSeconds: 10, blocks: [
+    block("Tabata", 8, 0, 0, [step("Burpees", 20), step("Pause", 10, "rest")]),
+  ]},
+];
+
+const kindLabel = k => (k === "work" ? "Übung" : "Pause");
+
+/** The workout as a linear sequence of timed phases. Steps with zero duration are dropped. */
+function phasesOf(w) {
+  const result = [];
+  const blocks = w.blocks.filter(b => b.steps.some(s => s.seconds > 0));
+  if (w.prepareSeconds > 0 && blocks.length) {
+    result.push({ name: "Bereit machen", seconds: w.prepareSeconds, kind: "prepare",
+                  blockName: blocks[0].name, round: 1, rounds: blocks[0].rounds, isRoundStart: false });
+  }
+  blocks.forEach((b, bi) => {
+    const rounds = Math.max(b.rounds, 1);
+    for (let round = 1; round <= rounds; round++) {
+      let isFirst = true;
+      for (const s of b.steps) {
+        if (s.seconds <= 0) continue;
+        result.push({ name: s.name || kindLabel(s.kind), seconds: s.seconds, kind: s.kind,
+                      blockName: b.name, round, rounds, isRoundStart: isFirst });
+        isFirst = false;
+      }
+      if (round < rounds && b.restBetweenRounds > 0) {
+        result.push({ name: "Rundenpause", seconds: b.restBetweenRounds, kind: "rest",
+                      blockName: b.name, round, rounds, isRoundStart: false });
+      }
+    }
+    if (bi < blocks.length - 1 && b.restAfterBlock > 0) {
+      result.push({ name: "Blockpause", seconds: b.restAfterBlock, kind: "rest",
+                    blockName: b.name, round: rounds, rounds, isRoundStart: false });
+    }
+  });
+  // A trailing rest is pointless: the workout is over.
+  while (result.length && result[result.length - 1].kind === "rest") result.pop();
+  return result;
+}
+const totalSeconds = w => phasesOf(w).reduce((a, p) => a + p.seconds, 0);
+
+function formatDuration(sec) {
+  const s = Math.max(sec, 0), pad = n => String(n).padStart(2, "0");
+  if (s >= 3600) return `${Math.floor(s / 3600)}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`;
+  return `${Math.floor(s / 60)}:${pad(s % 60)}`;
+}
+
+/** "45 Sekunden", "1 Minute", "2 Minuten 30" */
+function spokenDuration(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  if (m === 0) return `${s} Sekunden`;
+  if (s === 0) return m === 1 ? "1 Minute" : `${m} Minuten`;
+  return m === 1 ? `1 Minute ${s}` : `${m} Minuten ${s}`;
+}
+
+// ---------- Storage ----------
+const store = {
+  load(key, fallback) {
+    try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch { return fallback; }
+  },
+  save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
+};
+let workouts = store.load("takt.workouts", null) || SAMPLES();
+const settings = Object.assign({ sound: true, voice: true, voiceURI: "" }, store.load("takt.settings", {}));
+const saveWorkouts = () => store.save("takt.workouts", workouts);
+const saveSettings = () => store.save("takt.settings", settings);
+saveWorkouts();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+// ---------- Cues ----------
+/** Beeps via Web Audio, announcements via speechSynthesis. Both need a user gesture to unlock on iOS. */
+const cues = {
+  ctx: null,
+  begin() {
+    // "transient" asks iOS to duck music for cues instead of stopping it (Safari 16.4+).
+    try { if (navigator.audioSession) navigator.audioSession.type = "transient"; } catch {}
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.ctx.resume();
+    // Unlock speech inside the user gesture.
+    if (settings.voice && "speechSynthesis" in window) speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+  },
+  end() { if ("speechSynthesis" in window) speechSynthesis.cancel(); },
+  tone(freq, dur) {
+    if (!settings.sound || !this.ctx) return;
+    const t = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.6, t + 0.01);
+    gain.gain.setValueAtTime(0.6, t + dur - 0.01);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    osc.connect(gain).connect(this.ctx.destination);
+    osc.start(t); osc.stop(t + dur);
+  },
+  tick() { this.tone(880, 0.12); },
+  go() { this.tone(1320, 0.45); },
+  finish() { this.tone(1046, 1.0); },
+  say(text) {
+    if (!settings.voice || !text || !("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voices.selected();
+    if (v) u.voice = v;
+    u.lang = v ? v.lang : "de-DE";
+    speechSynthesis.speak(u);
+  },
+};
+
+/** German voices, enhanced/premium first (Safari marks them in the name or URI). */
+const voices = {
+  score(v) {
+    const id = (v.name + " " + v.voiceURI).toLowerCase();
+    if (id.includes("premium")) return 3;
+    if (id.includes("enhanced") || id.includes("erweitert")) return 2;
+    if (v.localService) return 1;
+    return 0;
+  },
+  german() {
+    if (!("speechSynthesis" in window)) return [];
+    return speechSynthesis.getVoices()
+      .filter(v => v.lang.toLowerCase().startsWith("de") && !/eloquence|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i.test(v.name + v.voiceURI))
+      .sort((a, b) => this.score(b) - this.score(a) || a.name.localeCompare(b.name));
+  },
+  selected() {
+    const all = this.german();
+    return all.find(v => v.voiceURI === settings.voiceURI) || all[0] || null;
+  },
+};
+
+// ---------- Screen wake lock ----------
+const wake = {
+  lock: null,
+  async on() {
+    try { if ("wakeLock" in navigator) this.lock = await navigator.wakeLock.request("screen"); } catch {}
+  },
+  off() { if (this.lock) { this.lock.release().catch(() => {}); this.lock = null; } },
+};
+
+// ---------- Runner ----------
+/** Runs phases against the wall clock. Timing is end-date based, so it doesn't drift and
+    catches up correctly after the browser suspended the page. */
+class Runner {
+  constructor(workout, onChange) {
+    this.workout = workout;
+    this.phases = phasesOf(workout);
+    this.onChange = onChange;
+    this.index = 0;
+    this.remaining = this.phases[0] ? this.phases[0].seconds : 0;
+    this.isRunning = false;
+    this.isFinished = this.phases.length === 0;
+    this.endDate = null; this.timer = null; this.lastBeep = null; this.hasStarted = false;
+  }
+  get current() { return this.phases[this.index] || null; }
+  get next() { return this.phases[this.index + 1] || null; }
+  get phaseProgress() { const c = this.current; return c && c.seconds > 0 ? 1 - this.remaining / c.seconds : 1; }
+  get remainingTotal() { return this.remaining + this.phases.slice(this.index + 1).reduce((a, p) => a + p.seconds, 0); }
+
+  start() {
+    if (this.isFinished || this.isRunning) return;
+    if (!this.hasStarted) { this.hasStarted = true; cues.begin(); this.announce(); }
+    this.endDate = Date.now() + this.remaining * 1000;
+    this.isRunning = true;
+    this.timer = setInterval(() => this.update(), 50);
+    this.onChange();
+  }
+  pause() {
+    if (!this.isRunning) return;
+    this.update();
+    this.isRunning = false;
+    clearInterval(this.timer); this.timer = null; this.endDate = null;
+    this.onChange();
+  }
+  toggle() { this.isRunning ? this.pause() : this.start(); }
+  skip() { if (!this.isFinished) this.jump(this.index + 1); }
+  /** Restarts the current phase, or goes to the previous one if the current phase just began. */
+  back() {
+    const c = this.current;
+    if (!c || this.isFinished) return;
+    const elapsed = c.seconds - this.remaining;
+    this.jump(elapsed > 2 || this.index === 0 ? this.index : this.index - 1);
+  }
+  stop() {
+    clearInterval(this.timer); this.timer = null;
+    this.isRunning = false;
+    if (this.hasStarted) cues.end();
+  }
+
+  jump(i) {
+    this.lastBeep = null;
+    if (i >= this.phases.length) { this.finish(); return; }
+    this.index = i;
+    this.remaining = this.phases[i].seconds;
+    if (this.isRunning) this.endDate = Date.now() + this.remaining * 1000;
+    if (this.hasStarted) this.announce();
+    this.onChange();
+  }
+  update() {
+    if (!this.isRunning || this.endDate === null) return;
+    let end = this.endDate, left = (end - Date.now()) / 1000;
+    let skipped = 0;
+    // Phase over: chain the next one onto the old end date so overshoot isn't lost.
+    while (left <= 0) {
+      if (this.index + 1 >= this.phases.length) { this.remaining = 0; this.finish(); return; }
+      this.index++; skipped++;
+      this.lastBeep = null;
+      end += this.phases[this.index].seconds * 1000;
+      left = (end - Date.now()) / 1000;
+    }
+    // After a long suspension several phases may pass at once: only announce the one we landed in.
+    if (skipped) this.announce();
+    this.endDate = end;
+    this.remaining = left;
+    const second = Math.ceil(left);
+    if (second <= 3 && second !== this.lastBeep && (this.current?.seconds || 0) > 3) {
+      this.lastBeep = second;
+      if (!skipped) cues.tick();
+    }
+    this.onChange();
+  }
+  finish() {
+    clearInterval(this.timer); this.timer = null;
+    this.isRunning = false; this.isFinished = true;
+    this.index = this.phases.length; this.remaining = 0;
+    cues.finish(); cues.say("Geschafft!");
+    this.onChange();
+  }
+  announce() {
+    const c = this.current;
+    if (!c) return;
+    cues.go();
+    if (c.kind === "prepare") {
+      cues.say(`Bereit machen. Als Erstes ${this.next ? this.next.name : ""}`);
+    } else if (c.kind === "work") {
+      let text = `${c.name}. ${spokenDuration(c.seconds)}`;
+      if (c.isRoundStart && c.rounds > 1) text = `Runde ${c.round} von ${c.rounds}. ` + text;
+      cues.say(text);
+    } else {
+      cues.say(this.next ? `${c.name}. Danach ${this.next.name}` : c.name);
+    }
+  }
+}
+
+// ---------- UI helpers ----------
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const views = ["list-view", "editor-view", "settings-view"];
+function show(view) { views.forEach(v => $(v).classList.toggle("hidden", v !== view)); window.scrollTo(0, 0); }
+
+// ---------- List ----------
+function renderList() {
+  const list = $("workout-list");
+  $("empty").classList.toggle("hidden", workouts.length > 0);
+  list.classList.toggle("hidden", workouts.length === 0);
+  list.innerHTML = workouts.map((w, i) => {
+    const n = w.blocks.length;
+    return `<div class="row">
+      <button class="grow" style="text-align:left" data-edit="${i}">
+        <div class="wk-name">${esc(w.name)}</div>
+        <div class="sub">${n === 1 ? "1 Block" : n + " Blöcke"} · ${formatDuration(totalSeconds(w))}</div>
+      </button>
+      <button class="play-btn" data-run="${i}" aria-label="Starten">▶</button>
+    </div>`;
+  }).join("");
+}
+$("workout-list").addEventListener("click", e => {
+  const edit = e.target.closest("[data-edit]"), run = e.target.closest("[data-run]");
+  if (run) startRun(workouts[+run.dataset.run]);
+  else if (edit) openEditor(+edit.dataset.edit);
+});
+$("new-workout").onclick = () => {
+  workouts.push({ id: uid(), name: "Neues Workout", prepareSeconds: 10,
+                  blocks: [block("Block 1", 3, 60, 120, [step("Übung", 40), step("Pause", 20, "rest")])] });
+  saveWorkouts();
+  openEditor(workouts.length - 1);
+};
+
+// ---------- Editor ----------
+let editing = null; // index into workouts
+
+function openEditor(i) { editing = i; renderEditor(); show("editor-view"); }
+$("editor-back").onclick = () => { editing = null; renderList(); show("list-view"); };
+$("editor-start").onclick = () => { if (phasesOf(workouts[editing]).length) startRun(workouts[editing]); };
+
+function stepperHTML(path, value) {
+  return `<div class="stepper"><button data-dec="${path}">−</button><span style="min-width:24px;text-align:center">${value}</span><button data-inc="${path}">+</button></div>`;
+}
+const durBtn = (path, sec) => `<button class="dur" data-dur="${path}">${formatDuration(sec)}</button>`;
+
+function renderEditor() {
+  const w = workouts[editing];
+  $("editor-title").textContent = w.name;
+  $("editor-start").style.opacity = phasesOf(w).length ? 1 : .3;
+  let html = `<div class="section-head">Workout</div><div class="card">
+      <div class="row"><input type="text" data-text="name" value="${esc(w.name)}" placeholder="Name"></div>
+      <div class="row"><span class="grow">Vorbereitung</span>${durBtn("prepareSeconds", w.prepareSeconds)}</div>
+    </div><p class="foot">Gesamtdauer ${formatDuration(totalSeconds(w))}</p>`;
+
+  w.blocks.forEach((b, bi) => {
+    const isLast = bi === w.blocks.length - 1;
+    const roundSec = b.steps.reduce((a, s) => a + s.seconds, 0);
+    html += `<div class="section-head"><span>${esc(b.name || "Block")}</span>
+        <span><button class="menu-btn" data-dup-block="${bi}">Duplizieren</button> ·
+        <button class="menu-btn danger" data-del-block="${bi}">Löschen</button></span></div>
+      <div class="card">
+        <div class="row"><input type="text" data-text="blocks.${bi}.name" value="${esc(b.name)}" placeholder="Blockname"></div>
+        <div class="row"><span class="grow">Runden</span>${stepperHTML(`blocks.${bi}.rounds`, b.rounds)}</div>
+        ${b.rounds > 1 ? `<div class="row"><span class="grow">Pause zwischen Runden</span>${durBtn(`blocks.${bi}.restBetweenRounds`, b.restBetweenRounds)}</div>` : ""}
+        ${!isLast ? `<div class="row"><span class="grow">Pause nach dem Block</span>${durBtn(`blocks.${bi}.restAfterBlock`, b.restAfterBlock)}</div>` : ""}
+        ${b.steps.map((s, si) => `<div class="row">
+          <button class="kind ${s.kind}" data-kind="blocks.${bi}.steps.${si}" aria-label="Art: ${kindLabel(s.kind)}">${s.kind === "work" ? "Ü" : "P"}</button>
+          <div class="grow"><input type="text" data-text="blocks.${bi}.steps.${si}.name" value="${esc(s.name)}" placeholder="${kindLabel(s.kind)}"></div>
+          ${si > 0 ? `<button class="move" data-up="${bi}.${si}" aria-label="Nach oben">▲</button>` : `<span class="move"></span>`}
+          ${durBtn(`blocks.${bi}.steps.${si}.seconds`, s.seconds)}
+          <button class="del" data-del-step="${bi}.${si}" aria-label="Löschen">⊖</button>
+        </div>`).join("")}
+        <div class="row"><button class="add" data-add-work="${bi}">＋ Übung</button><span class="grow"></span><button class="add" data-add-rest="${bi}">＋ Pause</button></div>
+      </div><p class="foot">${b.rounds} × ${formatDuration(roundSec)}</p>`;
+  });
+  html += `<div class="card" style="margin-top:22px"><button class="row add" data-add-block style="width:100%">＋ Block hinzufügen</button></div>
+    <div class="card" style="margin-top:22px">
+      <button class="row add" data-dup-workout style="width:100%">Workout duplizieren</button>
+      <button class="row danger" data-del-workout style="width:100%">Workout löschen</button>
+    </div>`;
+  $("editor").innerHTML = html;
+}
+
+/** Resolve "blocks.0.steps.1.seconds" to [parent object, key]. */
+function resolve(path) {
+  const parts = path.split(".");
+  let obj = workouts[editing];
+  for (const p of parts.slice(0, -1)) obj = obj[p];
+  return [obj, parts[parts.length - 1]];
+}
+function commit(rerender = true) { saveWorkouts(); if (rerender) renderEditor(); }
+
+$("editor").addEventListener("input", e => {
+  const path = e.target.dataset.text;
+  if (!path) return;
+  const [obj, key] = resolve(path);
+  obj[key] = e.target.value;
+  commit(false);
+  if (path === "name") $("editor-title").textContent = e.target.value;
+});
+$("editor").addEventListener("change", e => { if (e.target.dataset.text) renderEditor(); });
+
+$("editor").addEventListener("click", e => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  const d = t.dataset, w = workouts[editing];
+  if (d.dur) { const [obj, key] = resolve(d.dur); openDuration(obj[key], v => { obj[key] = v; commit(); }); return; }
+  if (d.inc || d.dec) {
+    const [obj, key] = resolve(d.inc || d.dec);
+    obj[key] = Math.min(99, Math.max(1, obj[key] + (d.inc ? 1 : -1)));
+    return commit();
+  }
+  if (d.kind) { const [obj, key] = resolve(d.kind); const s = obj[key];
+    const wasDefault = s.name === kindLabel(s.kind) || s.name === "";
+    s.kind = s.kind === "work" ? "rest" : "work";
+    if (wasDefault) s.name = s.kind === "rest" ? "Pause" : "";
+    return commit(); }
+  if (d.delStep) { const [bi, si] = d.delStep.split(".").map(Number); w.blocks[bi].steps.splice(si, 1); return commit(); }
+  if (d.up) { const [bi, si] = d.up.split(".").map(Number); const st = w.blocks[bi].steps;
+    [st[si - 1], st[si]] = [st[si], st[si - 1]]; return commit(); }
+  if (d.addWork) { w.blocks[+d.addWork].steps.push(step("", 40)); return commit(); }
+  if (d.addRest) { w.blocks[+d.addRest].steps.push(step("Pause", 20, "rest")); return commit(); }
+  if (d.dupBlock) { const b = w.blocks[+d.dupBlock];
+    const copy = { ...structuredClone(b), id: uid(), steps: b.steps.map(s => ({ ...s, id: uid() })) };
+    w.blocks.splice(+d.dupBlock + 1, 0, copy); return commit(); }
+  if (d.delBlock) { if (confirm(`Block „${w.blocks[+d.delBlock].name}“ löschen?`)) { w.blocks.splice(+d.delBlock, 1); commit(); } return; }
+  if ("addBlock" in d) { w.blocks.push(block(`Block ${w.blocks.length + 1}`, 3, 60, 120, [step("Übung", 40), step("Pause", 20, "rest")])); return commit(); }
+  if ("dupWorkout" in d) { const copy = structuredClone(w); copy.id = uid(); copy.name += " Kopie";
+    workouts.splice(editing + 1, 0, copy); saveWorkouts(); return openEditor(editing + 1); }
+  if ("delWorkout" in d) { if (confirm(`„${w.name}“ löschen?`)) { workouts.splice(editing, 1); saveWorkouts(); $("editor-back").click(); } }
+});
+
+// ---------- Duration sheet ----------
+let onDuration = null;
+(function setupPicker() {
+  const opts = (unit) => Array.from({ length: 60 }, (_, i) => `<option value="${i}">${i} ${unit}</option>`).join("");
+  $("pick-min").innerHTML = opts("min");
+  $("pick-sec").innerHTML = opts("s");
+  $("chips").innerHTML = [10, 15, 20, 30, 40, 45, 60, 90, 120, 180].map(s => `<button data-s="${s}">${formatDuration(s)}</button>`).join("");
+})();
+function openDuration(sec, cb) {
+  onDuration = cb;
+  $("pick-min").value = Math.floor(sec / 60);
+  $("pick-sec").value = sec % 60;
+  $("sheet").classList.remove("hidden");
+}
+function closeDuration() {
+  onDuration(+$("pick-min").value * 60 + +$("pick-sec").value);
+  $("sheet").classList.add("hidden");
+}
+$("sheet-done").onclick = closeDuration;
+$("sheet").addEventListener("click", e => {
+  if (e.target.id === "sheet") closeDuration();
+  const chip = e.target.closest("[data-s]");
+  if (chip) { const s = +chip.dataset.s; $("pick-min").value = Math.floor(s / 60); $("pick-sec").value = s % 60; closeDuration(); }
+});
+
+// ---------- Settings ----------
+function renderVoices() {
+  const list = voices.german();
+  $("set-voice-id").innerHTML = `<option value="">Automatisch (beste)</option>` +
+    list.map(v => `<option value="${esc(v.voiceURI)}">${esc(v.name)}</option>`).join("") +
+    (list.length ? "" : `<option disabled>Keine deutsche Stimme gefunden</option>`);
+  $("set-voice-id").value = settings.voiceURI;
+}
+if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = renderVoices;
+$("open-settings").onclick = () => {
+  $("set-sound").checked = settings.sound;
+  $("set-voice").checked = settings.voice;
+  $("voice-section").classList.toggle("hidden", !settings.voice);
+  $("version").textContent = `Takt ${VERSION}`;
+  renderVoices();
+  show("settings-view");
+};
+$("settings-done").onclick = () => show("list-view");
+$("set-sound").onchange = e => { settings.sound = e.target.checked; saveSettings(); };
+$("set-voice").onchange = e => { settings.voice = e.target.checked; saveSettings(); $("voice-section").classList.toggle("hidden", !settings.voice); };
+$("set-voice-id").onchange = e => { settings.voiceURI = e.target.value; saveSettings(); };
+$("voice-test").onclick = () => cues.say("Runde 2 von 4. Klimmzüge. 40 Sekunden.");
+$("export").onclick = () => {
+  const blob = new Blob([JSON.stringify(workouts, null, 2)], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "takt-workouts.json" });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$("import").onchange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (!Array.isArray(data) || !data.every(w => w && Array.isArray(w.blocks))) throw new Error();
+    if (confirm(`${data.length} Workouts importieren? Gleichnamige bleiben erhalten, die neuen kommen dazu.`)) {
+      data.forEach(w => { w.id = uid(); workouts.push(w); });
+      saveWorkouts(); renderList(); alert("Importiert.");
+    }
+  } catch { alert("Die Datei ist kein gültiger Takt-Export."); }
+  e.target.value = "";
+};
+
+// ---------- Run screen ----------
+let runner = null;
+const ICON = {
+  back: `<svg width="28" height="28" viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>`,
+  fwd: `<svg width="28" height="28" viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>`,
+  play: `<svg width="40" height="40" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>`,
+  pause: `<svg width="40" height="40" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>`,
+};
+
+function startRun(workout) {
+  runner = new Runner(structuredClone(workout), renderRun);
+  $("run").classList.remove("hidden");
+  buildRun();
+  wake.on();
+  runner.start(); // called inside the tap, so audio and speech get unlocked
+}
+function closeRun() {
+  runner.stop(); runner = null;
+  wake.off();
+  $("run").classList.add("hidden");
+  renderList();
+}
+
+function buildRun() {
+  const R = 45, C = 2 * Math.PI * R;
+  $("run").innerHTML = `
+    <div id="run-active">
+      <div class="run-top">
+        <button class="close" id="run-close" aria-label="Beenden">✕</button>
+        <div class="total"><small>Noch</small><b id="run-total"></b></div>
+      </div>
+      <div class="run-block"><b id="run-block"></b><span id="run-round"></span></div>
+    </div>
+    <div class="ring-wrap" id="ring-wrap">
+      <div class="ring" id="ring">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="4"/>
+          <circle id="ring-arc" cx="50" cy="50" r="${R}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+        <div class="inner"><div class="phase-name" id="run-name"></div><div class="clock" id="run-clock"></div><div class="paused-label" id="run-paused">Pausiert</div></div>
+      </div>
+    </div>
+    <div id="run-bottom">
+      <div class="next" id="run-next"></div>
+      <div class="controls">
+        <button id="run-back" aria-label="Zurück">${ICON.back}</button>
+        <button class="main" id="run-toggle" aria-label="Pause">${ICON.pause}</button>
+        <button id="run-skip" aria-label="Überspringen">${ICON.fwd}</button>
+      </div>
+    </div>
+    <div class="finished hidden" id="run-finished">
+      <div class="check">✓</div><h2>Geschafft!</h2>
+      <div id="fin-name" style="font-size:20px"></div><div id="fin-time" style="opacity:.85;font-weight:600"></div>
+      <div style="height:40px"></div>
+      <button class="big-btn" id="run-done">Fertig</button>
+    </div>`;
+  $("run-close").onclick = () => {
+    runner.pause();
+    if (confirm("Training beenden?")) closeRun(); else runner.start();
+  };
+  $("ring").onclick = () => runner.toggle();
+  $("run-toggle").onclick = () => runner.toggle();
+  $("run-back").onclick = () => runner.back();
+  $("run-skip").onclick = () => runner.skip();
+  $("run-done").onclick = closeRun;
+  renderRun();
+}
+
+let lastShown = "";
+function renderRun() {
+  if (!runner) return;
+  const run = $("run"), r = runner, c = r.current;
+  const done = r.isFinished;
+  ["run-active", "ring-wrap", "run-bottom"].forEach(id => $(id).classList.toggle("hidden", done));
+  $("run-finished").classList.toggle("hidden", !done);
+  run.className = done ? "work" : `${c.kind}${r.isRunning ? "" : " paused"}`;
+  if (done) {
+    $("fin-name").textContent = r.workout.name;
+    $("fin-time").textContent = formatDuration(totalSeconds(r.workout));
+    wake.off();
+    return;
+  }
+  const C = 2 * Math.PI * 45;
+  $("ring-arc").setAttribute("stroke-dashoffset", C * (1 - r.phaseProgress));
+  const key = `${r.index}|${Math.ceil(r.remaining)}|${r.isRunning}`;
+  if (key === lastShown) return;
+  lastShown = key;
+  $("run-total").textContent = formatDuration(Math.ceil(r.remainingTotal));
+  $("run-block").textContent = c.blockName;
+  $("run-round").textContent = c.rounds > 1 ? `Runde ${c.round} von ${c.rounds}` : "";
+  $("run-name").textContent = c.name;
+  $("run-clock").textContent = formatDuration(Math.ceil(r.remaining));
+  $("run-paused").classList.toggle("hidden", r.isRunning);
+  $("run-toggle").innerHTML = r.isRunning ? ICON.pause : ICON.play;
+  $("run-toggle").setAttribute("aria-label", r.isRunning ? "Pause" : "Weiter");
+  $("run-next").textContent = r.next ? `Als Nächstes: ${r.next.name} · ${formatDuration(r.next.seconds)}` : "Letzter Schritt";
+}
+
+// iOS drops the wake lock when the page is hidden; take it again on return.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && runner && !runner.isFinished) {
+    wake.on();
+    if (cues.ctx) cues.ctx.resume();
+    runner.update();
+  }
+});
+
+// ---------- Boot ----------
+renderList();
+if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
